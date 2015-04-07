@@ -1,0 +1,3 @@
+#!/bin/bash
+docker build -t blockparser-linux .
+cd ../ && docker run --rm -v "$PWD":/usr/src/blocker -w /usr/src/blocker blockparser-linux go get -u github.com/codegangsta/cli && go build -v
