@@ -58,6 +58,7 @@ type Block struct {
 	Nonce       string
 	StorageSize string         `bson:"storage_size"`
 	MixDigest   string         `bson:"mix_digest"`
+	Processed   bool           `bson:"processed"`
 	Id          *bson.ObjectId `bson:"_id,omitempty"`
 }
 
@@ -82,7 +83,7 @@ func (self *ImportMaster) importBlock(block *types.Block) {
 	blockHash := block.Header().Hash().Hex()
 	txAmount := uint64(len(block.Transactions()))
 	clilogger.Infoln("Importing block", blockHash, "Hash transactions:", txAmount)
-	err := self.blockCollection.Insert(&Block{blockHash, block.ParentHash().Hex(), block.Header().UncleHash.Hex(), block.Header().Coinbase.Hex(), block.Header().Root.Hex(), block.Header().TxHash.Hex(), block.Header().ReceiptHash.Hex(), block.Header().Number.String(), block.Header().Difficulty.String(), block.Header().GasLimit.String(), block.Header().GasUsed.String(), block.Header().Time, txAmount, string(block.Nonce()), block.Size().String(), block.Header().MixDigest.Hex(), nil})
+	err := self.blockCollection.Insert(&Block{blockHash, block.ParentHash().Hex(), block.Header().UncleHash.Hex(), block.Header().Coinbase.Hex(), block.Header().Root.Hex(), block.Header().TxHash.Hex(), block.Header().ReceiptHash.Hex(), block.Header().Number.String(), block.Header().Difficulty.String(), block.Header().GasLimit.String(), block.Header().GasUsed.String(), block.Header().Time, txAmount, string(block.Nonce()), block.Size().String(), block.Header().MixDigest.Hex(), false, nil})
 	if err != nil {
 		clilogger.Infoln(err)
 	}
