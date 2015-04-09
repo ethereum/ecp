@@ -5,6 +5,8 @@ import (
 	"github.com/ethereum/go-ethereum/cmd/utils"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/eth"
+	"github.com/ethereum/go-ethereum/logger"
+	"github.com/ethereum/go-ethereum/logger/glog"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -67,7 +69,8 @@ func NewImporter(ctx *cli.Context) *ImportMaster {
 	mongoUrl := ctx.String("mongo-url")
 	db := ctx.String("mongo-database")
 
-	clilogger.Infoln("Connecting to MongoDB db '", db, "' using", mongoUrl)
+	glog.V(logger.Info).Infoln("Connecting to MongoDB db '", db, "'using", mongoUrl)
+
 	session, err := mgo.Dial(mongoUrl)
 	if err != nil {
 		panic(err)
@@ -82,7 +85,9 @@ func NewImporter(ctx *cli.Context) *ImportMaster {
 func (self *ImportMaster) importBlock(block *types.Block) {
 	blockHash := block.Header().Hash().Hex()
 	txAmount := uint64(len(block.Transactions()))
-	clilogger.Infoln("Importing block", blockHash, "Hash transactions:", txAmount)
+
+	glog.V(logger.Info).Infoln("Importing block", blockHash, "Hash with ", txAmount, "transactions")
+
 	err := self.blockCollection.Insert(&Block{blockHash, block.ParentHash().Hex(), block.Header().UncleHash.Hex(), block.Header().Coinbase.Hex(), block.Header().Root.Hex(), block.Header().TxHash.Hex(), block.Header().ReceiptHash.Hex(), block.Header().Number.String(), block.Header().Difficulty.String(), block.Header().GasLimit.String(), block.Header().GasUsed.String(), block.Header().Time, txAmount, string(block.Nonce()), block.Size().String(), block.Header().MixDigest.Hex(), false, nil})
 	if err != nil {
 		clilogger.Infoln(err)
@@ -90,14 +95,16 @@ func (self *ImportMaster) importBlock(block *types.Block) {
 	result := Block{}
 	err = self.blockCollection.Find(bson.M{"block_hash": blockHash}).One(&result)
 	if err != nil {
-		utils.Fatalf("Could not find the block we just added: %v", err)
+		utils.Fatalf("Could not find the block we just added, saving faild: %v", err)
 	}
 	for _, tx := range block.Transactions() {
 		self.importTx(tx, result.Id)
 	}
 }
 func (self *ImportMaster) importTx(tx *types.Transaction, blockId *bson.ObjectId) {
-	clilogger.Infoln("Importing tx", tx.Hash().Hex())
+	if glog.V(logger.Info) {
+		glog.Infoln("Importing tx", tx.Hash().Hex())
+	}
 	err := self.txCollection.Insert(self.parseTx(tx, blockId))
 	if err != nil {
 		clilogger.Infoln(err)
