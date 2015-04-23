@@ -79,9 +79,15 @@ func run(ctx *cli.Context) {
 
 	ethereum, err := eth.New(cfg)
 	utils.StartEthereum(ethereum)
+
 	if err != nil {
 		utils.Fatalf("%v", err)
 	}
+
+	if ctx.GlobalBool(utils.RPCEnabledFlag.Name) {
+		utils.StartRPC(ethereum, ctx)
+	}
+
 	events := ethereum.EventMux().Subscribe(
 		core.ChainEvent{},
 		core.TxPreEvent{},
