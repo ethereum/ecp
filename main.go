@@ -44,7 +44,7 @@ func init() {
 		utils.ListenPortFlag,
 		utils.LogFileFlag,
 		utils.LogJSONFlag,
-		utils.LogLevelFlag,
+		utils.VerbosityFlag,
 		utils.MaxPeersFlag,
 		utils.EtherbaseFlag,
 		utils.MinerThreadsFlag,
