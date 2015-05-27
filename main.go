@@ -47,6 +47,7 @@ func init() {
 		utils.VerbosityFlag,
 		utils.MaxPeersFlag,
 		utils.EtherbaseFlag,
+		utils.BlockchainVersionFlag,
 		utils.MinerThreadsFlag,
 		utils.MiningEnabledFlag,
 		utils.NATFlag,
@@ -75,14 +76,14 @@ func main() {
 func run(ctx *cli.Context) {
 	importer := NewImporter(ctx)
 	utils.HandleInterrupt()
+
 	cfg := utils.MakeEthConfig("EthChainParser", Version, ctx)
 
 	ethereum, err := eth.New(cfg)
-	utils.StartEthereum(ethereum)
-
 	if err != nil {
 		utils.Fatalf("%v", err)
 	}
+	utils.StartEthereum(ethereum)
 
 	if ctx.GlobalBool(utils.RPCEnabledFlag.Name) {
 		utils.StartRPC(ethereum, ctx)
